@@ -33,17 +33,17 @@ class Settings(BaseSettings):
     # Google OAuth
     google_client_id: str = ""
     google_client_secret: str = ""
-    google_redirect_uri: str = "http://localhost:8000/api/v1/auth/google/callback"  # Backend callback URL
+    google_redirect_uri: str = "http://127.0.0.1:8000/api/v1/auth/google/callback"  # Backend callback URL
 
     # Google AI / Gemini
     google_api_key: str = ""
-    gemini_model_flash: str = "gemini-1.5-flash"
-    gemini_model_pro: str = "gemini-1.5-pro"
+    gemini_model_flash: str = "gemini-2.5-flash"
+    gemini_model_pro: str = "gemini-2.5-pro"
 
     # External APIs
     spotify_client_id: str = ""
     spotify_client_secret: str = ""
-    spotify_redirect_uri: str = "http://localhost:8000/api/v1/auth/spotify/callback"  # Backend callback URL
+    spotify_redirect_uri: str = "http://127.0.0.1:8000/api/v1/auth/spotify/callback"  # Backend callback URL
 
     github_token: str = ""
 

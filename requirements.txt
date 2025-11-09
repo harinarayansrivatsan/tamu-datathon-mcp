@@ -1,0 +1,51 @@
+# Core Web Framework
+fastapi==0.121.0
+uvicorn[standard]==0.38.0
+pydantic==2.12.4
+pydantic-settings==2.11.0
+
+# Google AI & Agent Development Kit
+google-adk==1.0.0
+google-genai==1.49.0
+
+# Model Context Protocol
+mcp==1.21.0
+
+# Database & ORM
+sqlalchemy==2.0.44
+alembic==1.17.1
+
+# HTTP Client
+httpx==0.28.1
+
+# Environment Variables
+python-dotenv==1.2.1
+
+# OAuth & Authentication
+google-auth==2.37.0
+google-auth-oauthlib==1.2.1
+google-auth-httplib2==0.2.0
+
+# API Integrations
+google-api-python-client==2.159.0
+spotipy==2.24.0
+
+# CORS & Security
+python-multipart==0.0.20
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+cryptography>=41.0.0
+
+# Utilities
+python-dateutil==2.9.0.post0
+pytz==2024.2
+
+# Development & Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+black==24.10.0
+ruff==0.8.5
+mypy==1.14.0
+
+# Production Server
+gunicorn==23.0.0

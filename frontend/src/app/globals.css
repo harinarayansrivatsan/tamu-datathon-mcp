@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Calming mental health light theme - soft blues and greens for peace */
+    --background: 210 25% 98%;
+    --foreground: 215 20% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 20% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 20% 20%;
+
+    --primary: 195 85% 45%; /* Calming teal */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%; /* Soft lavender-blue */
+    --secondary-foreground: 215 20% 20%;
+
+    --muted: 210 30% 96%;
+    --muted-foreground: 215 16% 46%;
+
+    --accent: 160 60% 50%; /* Peaceful sage green */
+    --accent-foreground: 215 20% 20%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 20% 90%;
+    --input: 214 20% 90%;
+    --ring: 195 85% 45%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

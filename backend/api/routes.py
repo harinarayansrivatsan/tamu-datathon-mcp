@@ -636,11 +636,11 @@ async def google_calendar_callback(
     # Check for OAuth errors from Google
     if error:
         print(f"❌ Google OAuth error: {error}")
-        return RedirectResponse(url=f"http://localhost:3000/settings?error=google_oauth_{error}")
+        return RedirectResponse(url=f"http://127.0.0.1:3000/settings?error=google_oauth_{error}")
 
     if not code:
         print(f"❌ No authorization code received")
-        return RedirectResponse(url="http://localhost:3000/settings?error=no_auth_code")
+        return RedirectResponse(url="http://127.0.0.1:3000/settings?error=no_auth_code")
 
     try:
         # Exchange authorization code for access token
@@ -664,7 +664,7 @@ async def google_calendar_callback(
             if token_response.status_code != 200:
                 error_detail = token_response.text
                 print(f"❌ Token exchange failed: {error_detail}")
-                return RedirectResponse(url=f"http://localhost:3000/settings?error=calendar_auth_failed")
+                return RedirectResponse(url=f"http://127.0.0.1:3000/settings?error=calendar_auth_failed")
 
             tokens = token_response.json()
             access_token = tokens["access_token"]
@@ -677,7 +677,7 @@ async def google_calendar_callback(
             )
 
             if userinfo_response.status_code != 200:
-                return RedirectResponse(url="http://localhost:3000/settings?error=user_info_failed")
+                return RedirectResponse(url="http://127.0.0.1:3000/settings?error=user_info_failed")
 
             userinfo = userinfo_response.json()
             user_email = userinfo.get("email")
@@ -689,12 +689,12 @@ async def google_calendar_callback(
 
             if not user:
                 print(f"❌ User not found: {user_email}")
-                return RedirectResponse(url="http://localhost:3000/settings?error=user_not_found")
+                return RedirectResponse(url="http://127.0.0.1:3000/settings?error=user_not_found")
 
             # Validate access token
             if not access_token:
                 print(f"❌ No access token received for user: {user_email}")
-                return RedirectResponse(url="http://localhost:3000/settings?error=no_access_token")
+                return RedirectResponse(url="http://127.0.0.1:3000/settings?error=no_access_token")
 
             print(f"✅ Access token received for user: {user_email}")
 
@@ -729,7 +729,7 @@ async def google_calendar_callback(
 
             print(f"✅ Calendar connected successfully for user: {user_email}")
 
-            return RedirectResponse(url="http://localhost:3000/settings?calendar=connected")
+            return RedirectResponse(url="http://127.0.0.1:3000/settings?calendar=connected")
 
     except Exception as e:
         import traceback
@@ -738,7 +738,7 @@ async def google_calendar_callback(
         print(f"   Traceback:")
         traceback.print_exc()
         print(f"{'='*60}\n")
-        return RedirectResponse(url=f"http://localhost:3000/settings?error={str(e)}")
+        return RedirectResponse(url=f"http://127.0.0.1:3000/settings?error={str(e)}")
 
 
 @router.get("/auth/google/callback")
@@ -859,11 +859,11 @@ async def spotify_callback(code: str, state: str, db: Session = Depends(get_db))
             user = db.query(User).filter(User.email == spotify_email).first()
 
             if not user:
-                return RedirectResponse(url="http://localhost:3000/settings?error=user_not_found")
+                return RedirectResponse(url="http://127.0.0.1:3000/settings?error=user_not_found")
 
             # Validate access token
             if not access_token:
-                return RedirectResponse(url="http://localhost:3000/settings?error=no_access_token")
+                return RedirectResponse(url="http://127.0.0.1:3000/settings?error=no_access_token")
 
             # Store Spotify token
             from backend.core.encryption import encrypt_token
@@ -881,7 +881,7 @@ async def spotify_callback(code: str, state: str, db: Session = Depends(get_db))
             permission.spotify_enabled = "true"
             db.commit()
 
-            return RedirectResponse(url="http://localhost:3000/settings?spotify=connected")
+            return RedirectResponse(url="http://127.0.0.1:3000/settings?spotify=connected")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Spotify auth failed: {str(e)}")

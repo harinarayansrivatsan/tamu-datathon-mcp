@@ -180,6 +180,9 @@ async def run_detection(
     calendar_token: Optional[str] = None,
     spotify_token: Optional[str] = None,
     baseline_data: Optional[Dict[str, Any]] = None,
+    baseline_social_frequency: Optional[float] = None,
+    baseline_valence: Optional[float] = None,
+    baseline_energy: Optional[float] = None,
 ) -> Dict[str, Any]:
     """
     Run the detection pipeline to assess loneliness risk.
@@ -190,7 +193,10 @@ async def run_detection(
         user_id: User identifier
         calendar_token: Google Calendar OAuth token
         spotify_token: Spotify OAuth token
-        baseline_data: User's baseline behavioral data (optional)
+        baseline_data: User's baseline behavioral data (optional, legacy parameter)
+        baseline_social_frequency: Baseline social event frequency (events/week)
+        baseline_valence: Baseline music valence (0-1)
+        baseline_energy: Baseline music energy (0-1)
 
     Returns:
         Risk assessment dictionary with:
@@ -198,6 +204,15 @@ async def run_detection(
         - spotify_metrics: Raw Spotify analysis data
         - calendar_metrics: Raw Calendar analysis data
     """
+    # Construct baseline_data from individual parameters if not provided
+    if not baseline_data and (baseline_social_frequency or baseline_valence or baseline_energy):
+        baseline_data = {
+            "social_event_frequency": baseline_social_frequency or 2.0,
+            "mood_baseline": {
+                "valence": baseline_valence or 0.5,
+                "energy": baseline_energy or 0.5,
+            }
+        }
     # Initialize metrics dictionaries
     spotify_metrics = {}
     calendar_metrics = {}

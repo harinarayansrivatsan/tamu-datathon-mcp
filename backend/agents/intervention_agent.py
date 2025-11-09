@@ -71,6 +71,83 @@ async def generate_empathetic_message(
     return messages.get(risk_level, messages["moderate"]).strip()
 
 
+async def generate_contextual_response(
+    risk_level: str,
+    risk_score: int,
+    user_message: Optional[str] = None,
+    user_interests: Optional[List[str]] = None,
+    user_location: Optional[str] = None,
+    activities: Optional[List[Dict[str, Any]]] = None,
+) -> str:
+    """
+    Generate a contextual, conversational response based on user message and context.
+
+    This provides a more intelligent fallback than static templates when Gemini API is unavailable.
+
+    Args:
+        risk_level: User's risk level
+        risk_score: Numerical risk score (0-100)
+        user_message: The user's current message
+        user_interests: User's interests
+        user_location: User's location
+        activities: Available activities/events
+
+    Returns:
+        Contextual response string
+    """
+    # Normalize user message
+    message_lower = (user_message or "").lower() if user_message else ""
+
+    # Build response based on user message content and risk level
+    response_parts = []
+
+    # Greeting/acknowledgment based on message content
+    if any(word in message_lower for word in ["hi", "hello", "hey"]):
+        response_parts.append("Hey! Thanks for reaching out. I'm here to listen and support you.")
+    elif any(word in message_lower for word in ["lonely", "alone", "isolated"]):
+        response_parts.append("I hear you. Feeling lonely can be really tough, and I appreciate you sharing that with me.")
+    elif any(word in message_lower for word in ["sad", "down", "depressed"]):
+        response_parts.append("I'm sorry you're going through this. Your feelings are completely valid, and I'm here for you.")
+    elif any(word in message_lower for word in ["stressed", "anxious", "overwhelmed"]):
+        response_parts.append("That sounds really challenging. Stress can definitely impact how we connect with others.")
+    elif any(word in message_lower for word in ["good", "great", "fine", "okay"]):
+        response_parts.append("I'm glad to hear that! It's good to check in.")
+    elif any(word in message_lower for word in ["tired", "exhausted"]):
+        response_parts.append("Being tired can make everything feel harder, including staying connected with others.")
+    else:
+        response_parts.append("Thanks for sharing that with me. I'm here to listen and support you however I can.")
+
+    # Risk-appropriate guidance
+    if risk_level == "critical":
+        response_parts.append("\n\nI'm genuinely concerned about you right now. Please consider reaching out to someone immediately - a friend, family member, or mental health professional.\n\n**Crisis Resources:**\n- National Suicide Prevention Lifeline: **988**\n- Crisis Text Line: Text **HOME** to **741741**\n- TAMU Counseling Services: **(979) 845-4427**")
+    elif risk_level == "high":
+        response_parts.append("\n\nI've noticed you've been more isolated lately. It might really help to connect with someone you trust, or consider talking to a counselor. You don't have to handle everything on your own.")
+    elif risk_level == "elevated":
+        response_parts.append("\n\nI've noticed some changes in your social patterns. Have you thought about reaching out to a friend or trying a small social activity? Sometimes reconnecting can really help.")
+    elif risk_level == "moderate":
+        response_parts.append("\n\nYour social connections seem a bit quieter than usual. This might be a good time to check in with friends or try something social that interests you.")
+    else:
+        response_parts.append("\n\nYour social wellness looks pretty good! Keep nurturing those connections that matter to you.")
+
+    # Add personalized suggestions based on context
+    if user_interests and len(user_interests) > 0:
+        interests_str = ", ".join(user_interests[:3])
+        response_parts.append(f"\n\nSince you're interested in {interests_str}, there might be some activities or groups in your area that align with what you enjoy.")
+
+    if activities and len(activities) > 0:
+        response_parts.append(f"\n\nI found {len(activities)} events in {user_location or 'your area'} that might interest you. Check out the events page to see what looks good!")
+    elif user_location and not activities:
+        response_parts.append(f"\n\nWould you like me to help find some events or activities in {user_location}? Setting your interests in Settings can help me find better matches!")
+
+    # Encouraging close
+    if risk_level in ["critical", "high"]:
+        response_parts.append("\n\nRemember: reaching out for help is a sign of strength, not weakness. You matter, and you deserve support.")
+    else:
+        response_parts.append("\n\nHow are you feeling about all this? I'm here if you want to talk more.")
+
+    return "".join(response_parts)
+
+
 async def recommend_activities(
     risk_level: str,
     interests: Optional[List[str]] = None,
@@ -297,6 +374,11 @@ async def run_intervention(
         user_context += f"- Available Activities: {len(activities)} events found matching their anxiety level and interests\n"
 
     try:
+        # Check if API key is available before attempting to use Gemini
+        if not settings.google_api_key or settings.google_api_key == "":
+            print("⚠️ No Google API key configured, using intelligent fallback")
+            raise ValueError("No API key configured")
+
         # Use Google GenAI SDK to generate personalized response
         from google import genai
 
@@ -317,11 +399,15 @@ async def run_intervention(
         import traceback
 
         traceback.print_exc()
-        # Fallback to template-based response
-        print("⚠️ Falling back to template response")
-        llm_message = await generate_empathetic_message(
+        # Fallback to intelligent context-aware response
+        print("⚠️ Falling back to context-aware response")
+        llm_message = await generate_contextual_response(
             risk_level=risk_level,
             risk_score=risk_score,
+            user_message=user_message,
+            user_interests=user_interests,
+            user_location=user_location,
+            activities=activities,
         )
 
     # Store intervention in database for tracking (if db_session and user_id provided)
